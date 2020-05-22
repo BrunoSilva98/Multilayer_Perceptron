@@ -1,5 +1,4 @@
 from Neuron import Neuron
-from Peso import Peso
 
 
 # Inputs devem ser sublistas [[], []]
@@ -36,31 +35,6 @@ class Perceptron:
         mse = mse / (len(self.padroes) * len(self.output_layer))
         return mse
 
-    def calcula_erro_total(self, corretas):
-        saidas = self.get_saidas()
-        erro = 0
-        for (saida, correta) in zip(saidas, corretas):
-            erro = erro + (correta - saida)
-        return erro
-
-    def evaluate(self):
-        saidas = list()
-        erros = list()
-        for (entrada, saida) in zip(self.padroes, self.correct_outputs):
-            saidas.clear()
-            for neuron in self.hidden_layer:
-                neuron.set_entradas(entrada)
-                neuron.evaluate()
-                saidas.append(neuron.saida)  # [0, 1]
-
-            for neuron in self.output_layer:
-                neuron.set_entradas(saidas)  # [1, 0, 1]
-                neuron.evaluate()
-            erros.append(self.calcula_erro_total(saida))
-
-        mse = self.loss_function(erros)
-        return mse, self.get_saidas()
-
     def calcula_erro(self, corretas):
         saidas = self.get_saidas()
         for (saida, correta) in zip(saidas, corretas):
@@ -86,7 +60,10 @@ class Perceptron:
                     self.calcula_erro(saida)
                     erros.append(neuron.erro)
 
-            self.atualiza_pesos()
+                self.calculate_deltas_output()
+                self.calculate_deltas_hidden()
+                self.atualiza_pesos()
+            mse = self.loss_function(erros)
 
     def calculate_deltas_output(self):
         for neuron in self.output_layer:
@@ -108,6 +85,20 @@ class Perceptron:
             delta = derivada * somatoria_pesos_deltas
             neuron.delta = delta
 
-
     def atualiza_pesos(self):
-        pass
+        for neuron in self.output_layer:
+            for idx in range(len(neuron.pesos)):
+                peso = neuron.pesos[idx]
+                entrada = neuron.entradas[idx]
+                peso.calc_gradiente(neuron.delta, entrada)
+                peso.calc_deslocamento(self.taxa_aprendizado, self.alpha)
+                peso.atualiza_peso()
+
+        for neuron in self.hidden_layer:
+            for idx in range(len(neuron.pesos)):
+                peso = neuron.pesos[idx]
+                entrada = neuron.entradas[idx]
+                peso.calc_gradiente(neuron.delta, entrada)
+                peso.calc_gradiente(neuron.delta, entrada)
+                peso.calc_deslocamento(self.taxa_aprendizado, self.alpha)
+                peso.atualiza_peso()
