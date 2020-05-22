@@ -7,7 +7,7 @@ class Peso:
         self.gradiente = None
         self.deslocamento = None
 
-    def calc_gradiente(self, delta_k, saida_ant): # Delta_K é o delta do neurônio a direita do peso, ant a esquerda
+    def calc_gradiente(self, delta_k, saida_ant):  # Delta_K é o delta do neurônio a direita do peso, ant a esquerda
         self.gradiente = delta_k * saida_ant
 
     def calc_deslocamento(self, taxa_aprendizado, alpha):

@@ -3,6 +3,7 @@ from Peso import Peso
 
 
 # Inputs devem ser sublistas [[], []]
+# noinspection PyMethodMayBeStatic
 class Perceptron:
     def __init__(self, inputs, saidas, taxa_aprendizado=0.2, alpha=0.2):
         self.padroes = inputs
@@ -30,16 +31,17 @@ class Perceptron:
     def loss_function(self, erros):  # MSE
         mse = 0
         for erro in erros:
+            erro = erro**2
             mse += erro
-        mse = mse/len(self.padroes)
+        mse = mse / (len(self.padroes) * len(self.output_layer))
         return mse
 
-    def calcula_erro(self, corretas):
+    def calcula_erro_total(self, corretas):
         saidas = self.get_saidas()
         erro = 0
         for (saida, correta) in zip(saidas, corretas):
             erro = erro + (correta - saida)
-        return erro**2
+        return erro
 
     def evaluate(self):
         saidas = list()
@@ -49,12 +51,63 @@ class Perceptron:
             for neuron in self.hidden_layer:
                 neuron.set_entradas(entrada)
                 neuron.evaluate()
-                saidas.append(neuron.saida)
+                saidas.append(neuron.saida)  # [0, 1]
 
             for neuron in self.output_layer:
-                neuron.set_entradas(saidas)
+                neuron.set_entradas(saidas)  # [1, 0, 1]
                 neuron.evaluate()
-            erros.append(self.calcula_erro(saida))
+            erros.append(self.calcula_erro_total(saida))
 
         mse = self.loss_function(erros)
-        return mse
+        return mse, self.get_saidas()
+
+    def calcula_erro(self, corretas):
+        saidas = self.get_saidas()
+        for (saida, correta) in zip(saidas, corretas):
+            for neuron in self.output_layer:
+                neuron.erro = correta - saida
+
+    def treina(self, erro_desejado):
+        mse = 1
+        while mse > erro_desejado:
+            saidas = list()
+            erros = list()
+            for (entrada, saida) in zip(self.padroes, self.correct_outputs):
+                saidas.clear()
+
+                for neuron in self.hidden_layer:
+                    neuron.set_entradas(entrada)
+                    neuron.evaluate()
+                    saidas.append(neuron.saida)
+
+                for neuron in self.output_layer:
+                    neuron.set_entradas(saidas)
+                    neuron.evaluate()
+                    self.calcula_erro(saida)
+                    erros.append(neuron.erro)
+
+            self.atualiza_pesos()
+
+    def calculate_deltas_output(self):
+        for neuron in self.output_layer:
+            derivada = neuron.derivada_sigmoid()
+            delta = derivada * neuron.erro
+            neuron.set_delta(delta)
+
+    def calculate_deltas_hidden(self):
+        somatoria_pesos_deltas = 0
+        for idx in range(len(self.hidden_layer)):
+            neuron = self.hidden_layer[idx]
+            derivada = neuron.derivada_sigmoid()
+
+            for neuron_k in self.output_layer:
+                peso = neuron_k.pesos[idx+1]
+                delta = neuron_k.delta
+                somatoria_pesos_deltas = somatoria_pesos_deltas + (peso * delta)
+
+            delta = derivada * somatoria_pesos_deltas
+            neuron.delta = delta
+
+
+    def atualiza_pesos(self):
+        pass

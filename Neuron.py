@@ -35,6 +35,10 @@ class Neuron:
     def sigmoid_activation(self, somatoria):
         self.saida = 1 / (1 + np.exp(-somatoria))
 
+    def derivada_sigmoid(self):
+        derivada = self.saida * (1 - self.saida)
+        return derivada
+
     def evaluate(self):
         somatoria = self.somatorio()
         self.sigmoid_activation(somatoria)
