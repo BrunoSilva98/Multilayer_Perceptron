@@ -5,16 +5,10 @@ class Peso:
     def __init__(self):
         self.value = random.random()
         self.gradiente = None
-        self.neuron_prev = None
-        self.neuron_after = None
         self.deslocamento = None
 
-    def set_neurons(self, neuron_prev, neuron_after):
-        self.neuron_prev = neuron_prev
-        self.neuron_after = neuron_after
-
-    def calc_gradiente(self):
-        self.gradiente = self.neuron_after.delta * self.neuron_prev.output
+    def calc_gradiente(self, delta_k, saida_ant): # Delta_K é o delta do neurônio a direita do peso, ant a esquerda
+        self.gradiente = delta_k * saida_ant
 
     def calc_deslocamento(self, taxa_aprendizado, alpha):
         if self.deslocamento is None:
