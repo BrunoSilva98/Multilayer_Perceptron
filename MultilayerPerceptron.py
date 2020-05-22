@@ -49,7 +49,7 @@ class Perceptron:
             print(epoch)
             saidas = list()
             erros = list()
-            for (entrada, saida) in zip(self.padroes, self.correct_outputs):
+            for (entrada, saida, index) in zip(self.padroes, self.correct_outputs, range(len(self.padroes))):
                 saidas.clear()
 
                 for neuron in self.hidden_layer:
@@ -60,11 +60,13 @@ class Perceptron:
                 for neuron in self.output_layer:
                     neuron.set_entradas(saidas)
                     neuron.evaluate()
+
                 self.calcula_erro(saida, erros)
                 # TODO Gravar a variação dos pesos na iteração anterior. A variação é única pra cada input
                 self.calculate_deltas_output()
                 self.calculate_deltas_hidden()
                 self.atualiza_pesos()
+
             mse = self.loss_function(erros)
             self.mse.append(mse)
         return epoch
