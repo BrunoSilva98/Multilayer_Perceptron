@@ -11,8 +11,9 @@ class Perceptron:
         self.taxa_aprendizado = taxa_aprendizado
         self.alpha = alpha
         self.correct_outputs = saidas
+        self.mse = list()
 
-    def add_layer(self, tipo, qtd_neurons):
+    def add_layer(self, tipo, qtd_neurons=None):
         if tipo.lower() == "hidden":
             for i in range(qtd_neurons):
                 self.hidden_layer.append(Neuron(len(self.padroes[0])))
@@ -35,15 +36,17 @@ class Perceptron:
         mse = mse / (len(self.padroes) * len(self.output_layer))
         return mse
 
-    def calcula_erro(self, corretas):
-        saidas = self.get_saidas()
-        for (saida, correta) in zip(saidas, corretas):
-            for neuron in self.output_layer:
-                neuron.erro = correta - saida
+    def calcula_erro(self, corretas, erros):
+        for neuron, correta in zip(self.output_layer, corretas):
+            neuron.erro = correta - neuron.saida
+            erros.append(neuron.erro)
 
     def treina(self, erro_desejado):
         mse = 1
+        epoch = 0
         while mse > erro_desejado:
+            epoch += 1
+            print(epoch)
             saidas = list()
             erros = list()
             for (entrada, saida) in zip(self.padroes, self.correct_outputs):
@@ -57,13 +60,14 @@ class Perceptron:
                 for neuron in self.output_layer:
                     neuron.set_entradas(saidas)
                     neuron.evaluate()
-                    self.calcula_erro(saida)
-                    erros.append(neuron.erro)
-
+                self.calcula_erro(saida, erros)
+                # TODO Gravar a variação dos pesos na iteração anterior. A variação é única pra cada input
                 self.calculate_deltas_output()
                 self.calculate_deltas_hidden()
                 self.atualiza_pesos()
             mse = self.loss_function(erros)
+            self.mse.append(mse)
+        return epoch
 
     def calculate_deltas_output(self):
         for neuron in self.output_layer:
@@ -72,15 +76,15 @@ class Perceptron:
             neuron.set_delta(delta)
 
     def calculate_deltas_hidden(self):
-        somatoria_pesos_deltas = 0
         for idx in range(len(self.hidden_layer)):
+            somatoria_pesos_deltas = 0
             neuron = self.hidden_layer[idx]
             derivada = neuron.derivada_sigmoid()
 
             for neuron_k in self.output_layer:
                 peso = neuron_k.pesos[idx+1]
                 delta = neuron_k.delta
-                somatoria_pesos_deltas = somatoria_pesos_deltas + (peso * delta)
+                somatoria_pesos_deltas = somatoria_pesos_deltas + (peso.value * delta)
 
             delta = derivada * somatoria_pesos_deltas
             neuron.delta = delta
@@ -98,7 +102,6 @@ class Perceptron:
             for idx in range(len(neuron.pesos)):
                 peso = neuron.pesos[idx]
                 entrada = neuron.entradas[idx]
-                peso.calc_gradiente(neuron.delta, entrada)
                 peso.calc_gradiente(neuron.delta, entrada)
                 peso.calc_deslocamento(self.taxa_aprendizado, self.alpha)
                 peso.atualiza_peso()
