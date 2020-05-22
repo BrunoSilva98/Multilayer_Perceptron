@@ -16,11 +16,11 @@ class Perceptron:
     def add_layer(self, tipo, qtd_neurons=None):
         if tipo.lower() == "hidden":
             for i in range(qtd_neurons):
-                self.hidden_layer.append(Neuron(len(self.padroes[0])))
+                self.hidden_layer.append(Neuron(len(self.padroes[0]), len(self.padroes)))
 
         elif tipo.lower() == "output":
             for i in range(len(self.correct_outputs[0])):
-                self.output_layer.append(Neuron(len(self.hidden_layer)))
+                self.output_layer.append(Neuron(len(self.hidden_layer), len(self.padroes)))
 
     def get_saidas(self):
         saidas = list()
@@ -65,7 +65,7 @@ class Perceptron:
                 # TODO Gravar a variação dos pesos na iteração anterior. A variação é única pra cada input
                 self.calculate_deltas_output()
                 self.calculate_deltas_hidden()
-                self.atualiza_pesos()
+                self.atualiza_pesos(index)
 
             mse = self.loss_function(erros)
             self.mse.append(mse)
@@ -91,13 +91,13 @@ class Perceptron:
             delta = derivada * somatoria_pesos_deltas
             neuron.delta = delta
 
-    def atualiza_pesos(self):
+    def atualiza_pesos(self, index_padrao):
         for neuron in self.output_layer:
             for idx in range(len(neuron.pesos)):
                 peso = neuron.pesos[idx]
                 entrada = neuron.entradas[idx]
                 peso.calc_gradiente(neuron.delta, entrada)
-                peso.calc_deslocamento(self.taxa_aprendizado, self.alpha)
+                peso.calc_deslocamento(self.taxa_aprendizado, self.alpha, index_padrao)
                 peso.atualiza_peso()
 
         for neuron in self.hidden_layer:
@@ -105,5 +105,5 @@ class Perceptron:
                 peso = neuron.pesos[idx]
                 entrada = neuron.entradas[idx]
                 peso.calc_gradiente(neuron.delta, entrada)
-                peso.calc_deslocamento(self.taxa_aprendizado, self.alpha)
+                peso.calc_deslocamento(self.taxa_aprendizado, self.alpha, index_padrao)
                 peso.atualiza_peso()

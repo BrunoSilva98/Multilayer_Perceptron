@@ -6,12 +6,12 @@ from Peso import Peso
 
 # noinspection PyMethodMayBeStatic
 class Neuron:
-    def __init__(self, input_length):
+    def __init__(self, input_length, num_padroes):
         self.entradas = list()
         self.pesos = list()
         self.saida = None
         self.delta = None
-        self.cria_pesos(input_length)
+        self.cria_pesos(input_length, num_padroes)
 
     def set_entradas(self, entradas):
         self.entradas.clear()
@@ -19,10 +19,10 @@ class Neuron:
         for value in entradas:
             self.entradas.append(value)
 
-    def cria_pesos(self, quantidade):
+    def cria_pesos(self, quantidade, num_padroes):
         quantidade += 1
         for i in range(quantidade):
-            self.pesos.append(Peso())
+            self.pesos.append(Peso(num_padroes))
 
     def somatorio(self):
         somatoria = 0
