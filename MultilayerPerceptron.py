@@ -44,9 +44,9 @@ class Perceptron:
     def treina(self, erro_desejado):
         mse = 1
         epoch = 0
-        while mse > erro_desejado:
+        while mse > erro_desejado and epoch < 500000:
             epoch += 1
-            print(epoch)
+            print("Epoca {}".format(epoch))
             saidas = list()
             erros = list()
             for (entrada, saida, index) in zip(self.padroes, self.correct_outputs, range(len(self.padroes))):
@@ -68,6 +68,7 @@ class Perceptron:
                 self.atualiza_pesos(index)
 
             mse = self.loss_function(erros)
+            print("Erro = {}".format(mse))
             self.mse.append(mse)
         return epoch
 
@@ -107,3 +108,18 @@ class Perceptron:
                 peso.calc_gradiente(neuron.delta, entrada)
                 peso.calc_deslocamento(self.taxa_aprendizado, self.alpha, index_padrao)
                 peso.atualiza_peso()
+
+    def evaluate(self, entrada):
+        saidas = list()
+        saida_final = list()
+        for neuron in self.hidden_layer:
+            neuron.set_entradas(entrada)
+            neuron.evaluate()
+            saidas.append(neuron.saida)
+
+        for neuron in self.output_layer:
+            neuron.set_entradas(saidas)
+            neuron.evaluate()
+            saida_final.append(neuron.saida)
+
+        return saida_final
