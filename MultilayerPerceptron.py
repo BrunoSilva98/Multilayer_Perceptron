@@ -41,10 +41,10 @@ class Perceptron:
             neuron.erro = correta - neuron.saida
             erros.append(neuron.erro)
 
-    def treina(self, erro_desejado):
+    def treina(self, erro_desejado=0.01, epocas=500000):
         mse = 1
         epoch = 0
-        while mse > erro_desejado and epoch < 500000:
+        while mse > erro_desejado and epoch < epocas:
             epoch += 1
             print("Epoca {}".format(epoch))
             saidas = list()
