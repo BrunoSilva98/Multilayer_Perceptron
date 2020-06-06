@@ -15,4 +15,5 @@ if __name__ == '__main__':
     plt.show()
 
     for entrada in entradas:
-        print(mlp.evaluate(entrada))
+        print("\nEntrada {0}".format(entrada))
+        print("Saida: {0}".format(mlp.evaluate(entrada)))

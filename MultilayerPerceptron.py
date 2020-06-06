@@ -44,11 +44,12 @@ class Perceptron:
     def treina(self, erro_desejado=0.01, epocas=500000):
         mse = 1
         epoch = 0
+
         while mse > erro_desejado and epoch < epocas:
             epoch += 1
-            print("Epoca {}".format(epoch))
             saidas = list()
             erros = list()
+
             for (entrada, saida, index) in zip(self.padroes, self.correct_outputs, range(len(self.padroes))):
                 saidas.clear()
 
@@ -62,13 +63,12 @@ class Perceptron:
                     neuron.evaluate()
 
                 self.calcula_erro(saida, erros)
-                # TODO Gravar a variação dos pesos na iteração anterior. A variação é única pra cada input
                 self.calculate_deltas_output()
                 self.calculate_deltas_hidden()
                 self.atualiza_pesos(index)
 
             mse = self.loss_function(erros)
-            print("Erro = {}".format(mse))
+            print("Epoca {0} ---- Erro = {1}".format(epoch, mse))
             self.mse.append(mse)
         return epoch
 
